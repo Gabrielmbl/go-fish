@@ -7,10 +7,13 @@ class Card
   def initialize(rank, suit)
     @rank = rank
     @suit = suit
-    @numerical_rank = RANKS.index(rank)
   end
 
   def ==(other)
     rank == other.rank
+  end
+
+  def numerical_rank
+    @numerical_rank ||= RANKS.index(rank)
   end
 end
