@@ -1,0 +1,26 @@
+require_relative 'card'
+
+class Deck
+  attr_reader :cards, :ranks, :suits, :num_cards
+
+  def initialize
+    @cards = create_deck
+    @num_cards = cards.count
+  end
+
+  def create_deck
+    cards = Card::SUITS.flat_map do |suit|
+      Card::RANKS.map do |rank|
+        Card.new(rank, suit)
+      end
+    end
+  end
+
+  def deal
+    cards.pop
+  end
+
+  def current_num_cards
+    cards.count
+  end
+end
