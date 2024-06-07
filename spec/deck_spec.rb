@@ -16,7 +16,7 @@ RSpec.describe Deck do
   end
 
   describe '#deal' do
-    it 'should deal the a card' do
+    it 'should remove a card from the deck' do
       num_cards = deck.num_cards
       card = deck.deal
       expect(card).not_to be_nil
@@ -27,6 +27,14 @@ RSpec.describe Deck do
       card1 = deck.deal
       card2 = deck.deal
       expect(card1).not_to eq(card2)
+    end
+  end
+
+  describe '#shuffle' do
+    it 'should shuffle the deck' do
+      original_cards = deck.cards.dup
+      deck.shuffle
+      expect(deck.cards).not_to eq(original_cards)
     end
   end
 end

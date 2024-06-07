@@ -23,4 +23,9 @@ class Deck
   def current_num_cards
     cards.count
   end
+
+  def shuffle
+    original_cards = cards.dup
+    cards.shuffle! until original_cards != cards
+  end
 end
