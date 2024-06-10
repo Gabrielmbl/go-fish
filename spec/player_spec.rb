@@ -61,16 +61,16 @@ RSpec.describe Player do
     end
   end
 
-  describe '#hand_has_books?' do
-    xit 'should return true if the player has four of a kind' do
-    end
-  end
+  # describe '#hand_has_books?' do
+  #   it 'should return true if the player has four of a kind' do
+  #   end
+  # end
 
-  describe '#add_to_books' do
-    xit 'should add the rank number of the card to player books' do
-      expect(player.books).to be_empty
-      player.add_to_books(card1.rank)
-      expect(player.books).to include(card1.rank)
-    end
-  end
+  # describe '#add_to_books' do
+  #   it 'should add the rank number of the card to player books' do
+  #     expect(player.books).to be_empty
+  #     player.add_to_books(card1.rank)
+  #     expect(player.books).to include(card1.rank)
+  #   end
+  # end
 end

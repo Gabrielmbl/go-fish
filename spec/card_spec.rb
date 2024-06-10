@@ -15,6 +15,13 @@ RSpec.describe Card do
     end
   end
 
+  describe '#numerical_rank' do
+    it 'should return the numerical value of the rank' do
+      card = Card.new('3', 'H')
+      expect(card.numerical_rank).to eq(1)
+    end
+  end
+
   describe '#==' do
     before do
       @card1 = Card.new('2', 'H')
