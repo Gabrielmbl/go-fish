@@ -139,7 +139,6 @@ RSpec.describe Game do
 
       game.deck.cards = []
       player1.add_to_books
-      player1.add_to_books
       player2.add_to_books
       expect(game.winner).to eq(player1)
     end
@@ -151,11 +150,11 @@ RSpec.describe Game do
 
       game.deck.cards = []
       player1.add_to_books
-      player1.add_to_books
-      player2.add_to_books
       player2.add_to_books
       player3.add_to_books
       expect(game.winner).to eq(player2)
     end
   end
+
+  # TODO: Make smoke test -> Test that plays the whole game to completion
 end

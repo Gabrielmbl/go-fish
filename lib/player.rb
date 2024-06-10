@@ -1,6 +1,5 @@
 require_relative 'deck'
-
-# TODO: Implement Book class
+require_relative 'book'
 
 class Player
   attr_reader :name, :hand, :books
@@ -40,7 +39,6 @@ class Player
       books.cards_array << cards
       remove_by_rank(rank)
       puts "#{name} added a book of #{rank}s"
-      return cards
     end
     nil
   end

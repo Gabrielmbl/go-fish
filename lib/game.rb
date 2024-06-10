@@ -1,6 +1,3 @@
-# TODO: Get game to start TDD
-# TODO: Talk about scenarios for play_round
-
 require_relative 'player'
 require_relative 'deck'
 
@@ -8,8 +5,10 @@ class Game
   attr_reader :players
   attr_accessor :current_player, :deck, :game_winner, :players_with_highest_number_of_books
 
+  STARTING_CARD_COUNT = 5
+
   def initialize(players)
-    @players = players
+    @players = *players
     @current_player = players.first
     @players_with_highest_number_of_books = nil
     @game_winner = nil
@@ -26,7 +25,7 @@ class Game
 
   def deal_to_players
     players.each do |player|
-      5.times { player.add_to_hand([deck.deal]) }
+      STARTING_CARD_COUNT.times { player.add_to_hand([deck.deal]) }
     end
   end
 
@@ -53,6 +52,8 @@ class Game
     puts "----------------------------------\n"
     opponent.remove_by_rank(rank)
   end
+
+  # TODO: For sockets, puts will have to be return methods
 
   def current_player_fish(current_player, opponent)
     puts "#{opponent.name} told #{current_player.name} to go fish"
