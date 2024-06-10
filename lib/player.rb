@@ -1,9 +1,11 @@
 require_relative 'deck'
 
+# TODO: Implement Book class
+
 class Player
   attr_reader :name, :hand, :books
 
-  def initialize(name = 'Random Name', hand: [], books: [])
+  def initialize(name = 'Random Name', hand: [], books: Book.new)
     @name = name
     @hand = hand
     @books = books
@@ -22,5 +24,24 @@ class Player
   end
 
   def hand_has_books?
+    ranks = hand.map(&:rank)
+    ranks.each do |rank|
+      return true if ranks.count(rank) == 4
+    end
+    false
+  end
+
+  def add_to_books
+    rank_counts = hand.map(&:rank).group_by(&:itself).transform_values(&:count)
+    rank_counts.each do |rank, count|
+      next unless count == 4
+
+      cards = hand.select { |card| card.rank == rank }
+      books.cards_array << cards
+      remove_by_rank(rank)
+      puts "#{name} added a book of #{rank}s"
+      return cards
+    end
+    nil
   end
 end

@@ -1,7 +1,8 @@
 require_relative 'card'
 
 class Deck
-  attr_reader :cards, :ranks, :suits, :num_cards
+  attr_reader :ranks, :suits, :num_cards
+  attr_accessor :cards
 
   def initialize
     @cards = create_deck

@@ -10,10 +10,10 @@ class Card
   end
 
   def ==(other)
-    rank == other.rank
+    rank == other.rank && suit == other.suit
   end
 
   def numerical_rank
-    @numerical_rank ||= RANKS.index(rank)
+    @numerical_rank ||= RANKS.index(rank) + 1
   end
 end
