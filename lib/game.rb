@@ -3,7 +3,7 @@ require_relative 'deck'
 
 class Game
   attr_reader :players
-  attr_accessor :current_player, :deck, :game_winner, :players_with_highest_number_of_books
+  attr_accessor :current_player, :deck, :game_winner, :players_with_highest_number_of_books, :round_state
 
   STARTING_CARD_COUNT = 5
 
@@ -12,6 +12,7 @@ class Game
     @current_player = players.first
     @players_with_highest_number_of_books = nil
     @game_winner = nil
+    @round_state = []
   end
 
   def deck
@@ -30,6 +31,7 @@ class Game
   end
 
   def play_round(current_player, opponent, rank)
+    round_state.clear
     return unless current_player_has_rank?(rank)
 
     if opponent.hand_has_ranks?(rank)
@@ -44,23 +46,23 @@ class Game
 
   def move_cards_from_opponent_to_current_player(current_player, opponent, rank)
     opponent.hand.each do |card|
-      if card.rank == rank
-        current_player.add_to_hand([card])
-        puts "#{opponent.name} gave #{current_player.name} the card Rank: #{card.rank}, Suit: #{card.suit}"
-      end
+      next unless card.rank == rank
+
+      current_player.add_to_hand([card])
+      puts "#{opponent.name} gave #{current_player.name} the card Rank: #{card.rank}, Suit: #{card.suit}"
+      round_state << "#{opponent.name} gave #{current_player.name} the card Rank: #{card.rank}, Suit: #{card.suit}\n"
     end
     puts "----------------------------------\n"
     opponent.remove_by_rank(rank)
   end
 
-  # TODO: For sockets, puts will have to be return methods
-
   def current_player_fish(current_player, opponent)
     puts "#{opponent.name} told #{current_player.name} to go fish"
+    round_state << "#{opponent.name} told #{current_player.name} to go fish\n"
     card = deck.deal
     current_player.add_to_hand(card)
-    puts "#{current_player.name} drew a card Rank: #{card.rank}, Suit: #{card.suit}"
-    puts "----------------------------------\n"
+    puts "#{current_player.name} drew a card Rank: #{card.rank}, Suit: #{card.suit}\n#{display_line}"
+    round_state << "#{current_player.name} drew a card Rank: #{card.rank}, Suit: #{card.suit}\n#{display_line}\n"
     card
   end
 
@@ -74,7 +76,8 @@ class Game
     if current_player.hand_has_ranks?(rank)
       true
     else
-      puts 'Ask for a rank that you have on your hand'
+      puts 'Ask for a rank that you already have in your hand'
+      round_state << "Ask for a rank that you already have in your hand\n#{display_line}\n"
       false
     end
   end
@@ -95,6 +98,23 @@ class Game
 
   def compare_book_values(players_with_highest_number_of_books)
     self.game_winner = players_with_highest_number_of_books.max_by { |player| player.books.value }
-    puts "#{game_winner.name} wins with number of books: #{game_winner.books.count} and value of books: #{game_winner.books.value}\n----------------------------------\n"
+    puts "#{game_winner.name} wins with number of books: #{game_winner.books.count} and value of books: #{game_winner.books.value}\n#{display_line}\n"
+    round_state << "#{game_winner.name} wins with number of books: #{game_winner.books.count} and value of books: #{game_winner.books.value}\n#{display_line}\n"
+  end
+
+  def check_empty_hand_or_draw_five(current_player = self.current_player)
+    return unless current_player.hand.empty?
+
+    winner if deck.cards.empty?
+
+    puts "#{current_player.name} has no cards in their hand"
+    round_state << "#{current_player.name} has no cards in their hand\n"
+
+    current_player.add_to_hand([deck.deal]) until deck.cards.empty? || current_player.hand.count == STARTING_CARD_COUNT
+    current_player.hand
+  end
+
+  def display_line
+    '----------------------------------'
   end
 end

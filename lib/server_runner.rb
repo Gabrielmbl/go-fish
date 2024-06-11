@@ -1,11 +1,10 @@
 require_relative '../lib/server'
 
-server = WarSocketServer.new
+server = Server.new
 server.start
 while true
   begin
     client = server.accept_new_client
-    # TODO: record_player_names
     next unless client
 
     server.record_player_names(client)

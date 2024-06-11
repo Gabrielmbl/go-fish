@@ -21,7 +21,7 @@ class Server
     @server = TCPServer.new(port_number)
   end
 
-  def provide_input(client, message)
+  def send_message(client, message)
     client.puts(message)
   end
 

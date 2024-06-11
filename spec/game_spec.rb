@@ -45,6 +45,31 @@ RSpec.describe Game do
     end
   end
 
+  describe '#check_hand_or_draw_five' do
+    it 'should return nil if the player has cards in his hand' do
+      player1.add_to_hand(card1)
+      expect(game.check_empty_hand_or_draw_five(player1)).to be_nil
+    end
+
+    it 'should return 5 cards from the deck if the player has no cards in his hand' do
+      game.deck.cards = [card1, card2, card3, card4, card5]
+      game.check_empty_hand_or_draw_five(player1)
+      expect(player1.hand.count).to eq(5)
+    end
+
+    it 'should add 3 cards to the player hand if the deck only has 3 cards' do
+      game.deck.cards = [card1, card2, card3]
+      game.check_empty_hand_or_draw_five(player1)
+      expect(player1.hand.count).to eq(3)
+    end
+
+    it 'should call winner function if the deck is empty' do
+      game.deck.cards = []
+      expect(game).to receive(:winner).once
+      game.check_empty_hand_or_draw_five(player1)
+    end
+  end
+
   describe '#play_round' do
     before do
       player1.add_to_hand([Card.new('2', 'H')])

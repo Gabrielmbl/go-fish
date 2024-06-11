@@ -12,7 +12,7 @@ class MockClient
     @socket = TCPSocket.new('localhost', port)
   end
 
-  def provide_input(text)
+  def send_message(text)
     @socket.puts(text)
   end
 

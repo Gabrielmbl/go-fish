@@ -5,7 +5,7 @@ require_relative '../lib/game_runner'
 require_relative 'server_spec'
 require 'game'
 
-describe GameRunner do
+RSpec.describe GameRunner do
   before(:each) do
     @clients = []
     @server = Server.new
@@ -20,81 +20,74 @@ describe GameRunner do
     end
   end
 
-  let(:client1) { MockClient.new(@server.port_number) }
-  let(:client2) { MockClient.new(@server.port_number) }
+  let(:client1) { Client.new(@server.port_number) }
+  let(:client2) { Client.new(@server.port_number) }
 
   before do
-    client1 = Client.new(@server.port_number)
-    @clients.push(client1)
-    @server_client1 = @server.accept_new_client('Player 1')
-    client1.provide_input("Player 1\n")
-    @server.record_player_names(@server_client)
-    client2 = Client.new(@server.port_number)
-    @clients.push(client2)
-    @server_client2 = @server.accept_new_client('Player 2')
-    @server_client = @server.accept_new_client
-    client2.provide_input("Player 2\n")
-    @server.record_player_names(@server_client)
+    @client1 = Client.new(@server.port_number)
+    @clients.push(@client1)
+    @server_client1 = @server.accept_new_client
+    @client1.provide_input("Player1\n")
+    @server.record_player_names(@server_client1)
+    @client2 = Client.new(@server.port_number)
+    @clients.push(@client2)
+    @server_client2 = @server.accept_new_client
+    @client2.provide_input("Player2\n")
+    @server.record_player_names(@server_client2)
     @game = @server.create_game_if_possible
     @game_runner = @server.runner(@game)
   end
 
   describe '#prompt_enter' do
     it 'should promp clients to play their card' do
+      @client1.capture_output
       @game_runner.prompt_enter(@server_client1)
-      result = client1.capture_output
-      expect(result).to eq "Type play to play your card\n"
-    end
-  end
-
-  describe '#player_ready' do
-    xit 'should return true if it captures an ENTER from the client' do
-      client1.provide_input("\n")
-      client2.provide_input("\n")
-      expect(@game_runner.player_ready(client1)).to be true
-    end
-  end
-
-  describe '#ready' do
-    xit 'should return nil if all players are ready' do
-      expect(@game_runner.ready).to be_nil
-    end
-  end
-
-  describe '#run' do
-    xit 'should prompt clients to press ENTER to say that they are ready for the round' do
-      expect(client1.capture_output.chomp).to eq 'Press ENTER to start round'
-      expect(client2.capture_output.chomp).to eq 'Press ENTER to start round'
-    end
-
-    xit 'should expect a round to have been played' do
-      # client1.provide input
-      # client2.provide input
-      # expect a round to have been played
-      half_of_deck = (game.deck.num_cards / 2).floor
-      client1.provide_input("\n")
-      client2.provide_input("\n")
-      expect(@game.player1.cards_left).not_to be half_of_deck
+      result = @client1.capture_output
+      expect(result).to eq "Type ready if you are ready to play\n"
     end
   end
 
   describe '#run_loop' do
-    it 'should run round and prompt clients' do
-      clients = @game_runner.clients
-      expect(clients).to match_array([@server_client1, @server_client2])
-      @game.start
+    it "should make players draw cards if they don't have any cards in their hand" do
+      current_player = @game.current_player
+      current_player.hand = []
+      expect { @game_runner.run_loop }.to change { current_player.hand.count }.by(5)
+    end
+
+    it 'should tell client to ask for a rank that they already have in their hand' do
+      current_player = @game.current_player
+      current_player.hand = [Card.new('2', 'H')]
+      @client1.provide_input('Player2, 3')
       @game_runner.run_loop
-      output_expected([client1, client2], "Type play to play your card\n")
-      clients_type_play(client1, client2)
+      expect(@client1.capture_output).to include('Ask for a rank that you already have in your hand')
+    end
+
+    it 'should state the outcome of the round' do
+      current_player = @game.current_player
+      other_player = @game.players[1]
+      current_player.hand = [Card.new('2', 'H')]
+      other_player.hand = [Card.new('2', 'S')]
+      @client1.provide_input('Player2, 2')
       @game_runner.run_loop
-      output_match([client1, client2], /Player \d wins the round/)
+      output_expected([@client1, @client2],
+                      "#{other_player.name} gave #{current_player.name} the card Rank: 2, Suit: S")
+    end
+
+    it 'displays the hand to the player that just played at the end of a round' do
+      current_player = @game.current_player
+      current_player.hand = [Card.new('2', 'H')]
+      other_player = @game.players[1]
+      other_player.hand = [Card.new('2', 'S'), Card.new('4', 'H')]
+      @client1.provide_input('Player2, 2')
       @game_runner.run_loop
-      output_expected([client1, client2], "Type play to play your card\n")
+      output_expected([@client1], '2 of H')
+      expect(@client1.capture_output).not_to include('4 of H')
+      expect(@client2.capture_output).not_to include('2 of S')
     end
   end
 
   def output_expected(clients, expected_output)
-    clients.each { |client| expect(client.capture_output).to eq expected_output }
+    clients.each { |client| expect(client.capture_output).to include expected_output }
   end
 
   def output_match(clients, output_to_match)
@@ -102,6 +95,6 @@ describe GameRunner do
   end
 
   def clients_type_play(*clients)
-    clients.each { |client| client.provide_input('play') }
+    clients.each { |client| client.provide_input('ready') }
   end
 end
