@@ -39,7 +39,7 @@ class Player
       cards = hand.select { |card| card.rank == rank }
       books.cards_array << cards
       remove_by_rank(rank)
-      puts "#{name} added a book of #{rank}s"
+      return "#{name} added a book of #{rank}s"
     end
     nil
   end

@@ -181,5 +181,17 @@ RSpec.describe Game do
     end
   end
 
-  # TODO: Make smoke test -> Test that plays the whole game to completion
+  describe 'smoke test' do
+    fit 'should play the whole game to completion' do
+      game.start
+      until game.winner
+        current_player = game.current_player
+        other_player = game.players.select { |player| player != current_player }.first
+        game.check_empty_hand_or_draw_five(current_player)
+        rank = current_player.hand.sample.rank
+        puts "#{current_player.name} is asking for rank #{rank}"
+        game.play_round(current_player, other_player, rank)
+      end
+    end
+  end
 end

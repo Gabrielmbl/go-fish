@@ -41,7 +41,7 @@ class Game
       update_current_player(current_player) if card.rank != rank
     end
 
-    current_player.add_to_books
+    round_state << current_player.add_to_books
   end
 
   def move_cards_from_opponent_to_current_player(current_player, opponent, rank)
@@ -52,7 +52,7 @@ class Game
       puts "#{opponent.name} gave #{current_player.name} the card Rank: #{card.rank}, Suit: #{card.suit}"
       round_state << "#{opponent.name} gave #{current_player.name} the card Rank: #{card.rank}, Suit: #{card.suit}\n"
     end
-    puts "----------------------------------\n"
+    puts "#{display_line}\n"
     opponent.remove_by_rank(rank)
   end
 
@@ -98,8 +98,13 @@ class Game
 
   def compare_book_values(players_with_highest_number_of_books)
     self.game_winner = players_with_highest_number_of_books.max_by { |player| player.books.value }
-    puts "#{game_winner.name} wins with number of books: #{game_winner.books.count} and value of books: #{game_winner.books.value}\n#{display_line}\n"
+    losers = players.reject { |player| player == game_winner }
+    puts "#{game_winner.name} wins with number of books: #{game_winner.books.count} and value of books: #{game_winner.books.value}\n"
     round_state << "#{game_winner.name} wins with number of books: #{game_winner.books.count} and value of books: #{game_winner.books.value}\n#{display_line}\n"
+    losers.each do |loser|
+      puts "#{loser.name} has number of books: #{loser.books.count} and value of books: #{loser.books.value}\n#{display_line}\n"
+      round_state << "#{loser.name} has number of books: #{loser.books.count} and value of books: #{loser.books.value}\n#{display_line}\n"
+    end
   end
 
   def check_empty_hand_or_draw_five(current_player = self.current_player)
