@@ -182,7 +182,7 @@ RSpec.describe Game do
   end
 
   describe 'smoke test' do
-    fit 'should play the whole game to completion' do
+    it 'should play the whole game to completion' do
       game.start
       until game.winner
         current_player = game.current_player

@@ -38,15 +38,6 @@ RSpec.describe GameRunner do
     @game_runner = @server.runner(@game)
   end
 
-  describe '#prompt_enter' do
-    it 'should promp clients to play their card' do
-      @client1.capture_output
-      @game_runner.prompt_enter(@server_client1)
-      result = @client1.capture_output
-      expect(result).to eq "Type ready if you are ready to play\n"
-    end
-  end
-
   describe '#run_loop' do
     it "should make players draw cards if they don't have any cards in their hand" do
       current_player = @game.current_player
@@ -83,6 +74,9 @@ RSpec.describe GameRunner do
       output_expected([@client1], '2 of H')
       expect(@client1.capture_output).not_to include('4 of H')
       expect(@client2.capture_output).not_to include('2 of S')
+    end
+
+    it 'should prevent players from typing their own name' do
     end
   end
 

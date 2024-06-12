@@ -13,6 +13,10 @@ class Game
     @players_with_highest_number_of_books = nil
     @game_winner = nil
     @round_state = []
+    # last_turn_player
+    # last_turn_opponent
+    # last_turn_card_taken
+    # last_turn_book
   end
 
   def deck
@@ -42,6 +46,7 @@ class Game
     end
 
     round_state << current_player.add_to_books
+    puts "#{display_line}\n"
   end
 
   def move_cards_from_opponent_to_current_player(current_player, opponent, rank)
@@ -52,7 +57,7 @@ class Game
       puts "#{opponent.name} gave #{current_player.name} the card Rank: #{card.rank}, Suit: #{card.suit}"
       round_state << "#{opponent.name} gave #{current_player.name} the card Rank: #{card.rank}, Suit: #{card.suit}\n"
     end
-    puts "#{display_line}\n"
+
     opponent.remove_by_rank(rank)
   end
 

@@ -19,47 +19,57 @@ class GameRunner
     run_loop until game.game_winner
   end
 
-  def run_loop
-    current_player_client = server.players.key(game.current_player)
+  # TODO: Fix messaging -> Create RoundResult class
+  # TODO: Guard from typing the name of someone else when recording names
+  # TODO: Guard from mistakenly typing your own name to ask
+  # TODO: Guard from writing opponent's names wrong
+  def run_loop(game_current_player = game.current_player)
+    current_player_client = server.players.key(game_current_player)
 
     if game.check_empty_hand_or_draw_five
       server.send_message(current_player_client, game.round_state.first)
       game.round_state.clear
+      return
     end
 
-    ask_for_move(current_player_client)
+    ask_for_move(current_player_client, game_current_player)
 
+    opponent_player, rank = receive_oponent_and_rank(current_player_client)
+    return unless opponent_player && rank
+
+    game.play_round(game_current_player, opponent_player, rank)
+    send_round_outcome(current_player_client, game_current_player)
+  end
+
+  def receive_oponent_and_rank(current_player_client)
     opponent, rank = capture_input(current_player_client).split(',').map(&:strip)
     return unless opponent && rank
 
     opponent_player = game.players.find { |player| player.name == opponent }
+    [opponent_player, rank]
+  end
 
-    game.play_round(game.current_player, opponent_player, rank)
+  def send_round_outcome(client, game_current_player)
     game.round_state.each { |state| clients.each { |client| server.send_message(client, state) } }
-    # TODO: Find out why display_hand now shows the hand of the opponent
-    display_hand(current_player_client)
+    display_hand(client, game_current_player)
     prompted_players.clear
   end
 
-  def ask_for_move(current_player_client)
-    return if prompted_players.include?(current_player_client)
+  def ask_for_move(client, game_current_player)
+    return if prompted_players.include?(client)
 
-    display_hand(current_player_client)
-    display_opponent_names(current_player_client)
-    prompt_move_request(current_player_client)
-    prompted_players << current_player_client
-  end
-
-  def prompt_enter(client)
-    client.puts('Type ready if you are ready to play')
+    display_hand(client, game_current_player)
+    display_opponent_names(client)
+    prompt_move_request(client)
+    prompted_players << client
   end
 
   def prompt_move_request(client)
     client.puts('Enter the name of the player you want to request a card from and the rank of the card you want. e.g. "Kevin, 5":')
   end
 
-  def display_hand(client)
-    hand = game.current_player.hand.map { |card| "#{card.rank} of #{card.suit}" }.join(', ')
+  def display_hand(client, game_current_player)
+    hand = game_current_player.hand.map { |card| "#{card.rank} of #{card.suit}" }.join(', ')
     client.puts("\nYour hand:\n#{display_line}\n#{hand}\n#{display_line}")
   end
 

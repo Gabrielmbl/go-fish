@@ -32,15 +32,19 @@ class Player
   end
 
   def add_to_books
+    books_added = []
     rank_counts = hand.map(&:rank).group_by(&:itself).transform_values(&:count)
     rank_counts.each do |rank, count|
       next unless count == 4
 
       cards = hand.select { |card| card.rank == rank }
       books.cards_array << cards
+      books_added << rank
       remove_by_rank(rank)
-      return "#{name} added a book of #{rank}s"
     end
+    puts "#{name} added book(s) of #{books_added.join(', ')}" if books_added.any?
+    return "#{name} added book(s) of #{books_added.join(', ')}" if books_added.any?
+
     nil
   end
 end
